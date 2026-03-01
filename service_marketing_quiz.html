@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Marketing Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1b2d;
+    --deep: #1a2d47;
+    --card: #1e3454;
+    --accent: #f5a623;
+    --gold: #ffd166;
+    --correct: #06d6a0;
+    --wrong: #ef476f;
+    --text: #e8edf5;
+    --muted: #8fa4c0;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 10%, rgba(245,166,35,0.06) 0%, transparent 50%),
+                      radial-gradient(ellipse at 80% 80%, rgba(6,214,160,0.04) 0%, transparent 50%);
+  }
+
+  /* SCREEN: START */
+  #start-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff 0%, #a8c4e0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 3rem;
+    max-width: 420px;
+    line-height: 1.6;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.2rem 1.8rem;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.2rem;
+  }
+
+  .mode-selector {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .mode-btn {
+    background: var(--deep);
+    border: 2px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .mode-btn.active, .mode-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(245,166,35,0.08);
+  }
+
+  .start-btn {
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    border: none;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 1rem 3rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 30px rgba(245,166,35,0.3);
+  }
+
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245,166,35,0.4); }
+
+  /* SCREEN: QUIZ */
+  #quiz-screen { display: none; min-height: 100vh; padding: 2rem 1rem; }
+
+  .quiz-header {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+  }
+
+  .progress-bar-wrap {
+    background: var(--deep);
+    border-radius: 100px;
+    height: 6px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.4s ease;
+  }
+
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .q-counter { font-weight: 600; }
+
+  .score-badge {
+    background: rgba(6,214,160,0.12);
+    border: 1px solid rgba(6,214,160,0.25);
+    color: var(--correct);
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .timer-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    transition: border-color 0.3s;
+  }
+
+  .timer-circle.urgent { border-color: var(--wrong); color: var(--wrong); }
+
+  /* QUESTION CARD */
+  .question-card {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2.5rem;
+    animation: slideIn 0.35s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .topic-tag {
+    display: inline-block;
+    background: rgba(245,166,35,0.12);
+    border: 1px solid rgba(245,166,35,0.2);
+    color: var(--accent);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    margin-bottom: 1.2rem;
+  }
+
+  .question-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 2rem;
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .option-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    text-align: left;
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.5;
+    width: 100%;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: rgba(245,166,35,0.4);
+    background: rgba(245,166,35,0.06);
+  }
+
+  .option-letter {
+    min-width: 28px;
+    height: 28px;
+    background: var(--deep);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(6,214,160,0.08);
+  }
+
+  .option-btn.correct .option-letter {
+    background: var(--correct);
+    color: #fff;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(239,71,111,0.08);
+  }
+
+  .option-btn.wrong .option-letter {
+    background: var(--wrong);
+    color: #fff;
+  }
+
+  .option-btn.dimmed { opacity: 0.4; }
+  .option-btn:disabled { cursor: default; }
+
+  /* EXPLANATION */
+  .explanation-box {
+    margin-top: 1.5rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .explanation-box.show { display: block; }
+
+  .explanation-box strong { color: var(--text); }
+
+  .next-btn {
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    border: none;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.85rem 2.5rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+    width: 100%;
+  }
+
+  .next-btn.show { display: block; }
+  .next-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,166,35,0.3); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCREEN: RESULTS */
+  #result-screen {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .result-card {
+    max-width: 600px;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 3rem 2.5rem;
+  }
+
+  .result-emoji { font-size: 3.5rem; margin-bottom: 1rem; }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-score-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin: 1.5rem 0;
+  }
+
+  .result-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .result-detail { font-size: 0.85rem; color: var(--muted); }
+  .result-detail strong { display: block; font-size: 1.3rem; color: var(--text); margin-bottom: 0.1rem; }
+
+  .breakdown-bars { text-align: left; margin-bottom: 2rem; }
+
+  .breakdown-row { margin-bottom: 1rem; }
+  .breakdown-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
+  .breakdown-bar-bg { background: var(--deep); border-radius: 100px; height: 8px; }
+  .breakdown-bar-fill { height: 100%; border-radius: 100px; transition: width 1s ease; }
+
+  .action-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .retry-btn {
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    border: none; color: var(--navy);
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700;
+    padding: 0.85rem 2rem; border-radius: 100px; cursor: pointer; transition: all 0.2s;
+  }
+
+  .retry-btn:hover { transform: translateY(-2px); }
+
+  .review-btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+    padding: 0.85rem 2rem; border-radius: 100px; cursor: pointer; transition: all 0.2s;
+  }
+
+  .review-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .question-card { padding: 1.5rem; }
+    .result-card { padding: 2rem 1.5rem; }
+    .result-score-big { font-size: 3.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+  <div class="badge">UTS Midterm Prep</div>
+  <h1>Service<br><span>Marketing</span></h1>
+  <p class="subtitle">100 multiple-choice questions covering all key concepts from your course notes. Test yourself before the exam.</p>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num">100</div><div class="stat-label">Questions</div></div>
+    <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">Topics</div></div>
+    <div class="stat-card"><div class="stat-num">30s</div><div class="stat-label">Per Question</div></div>
+  </div>
+  <div class="mode-selector">
+    <button class="mode-btn active" onclick="selectMode(this,'all')">All 100 Questions</button>
+    <button class="mode-btn" onclick="selectMode(this,'ch1')">Ch.1 Only</button>
+    <button class="mode-btn" onclick="selectMode(this,'ch2')">Ch.2 Only</button>
+    <button class="mode-btn" onclick="selectMode(this,'random25')">Quick 25</button>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen">
+  <div class="quiz-header">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="quiz-meta">
+      <span class="q-counter" id="q-counter">Question 1 of 100</span>
+      <div class="timer-wrap">
+        <div class="timer-circle" id="timer-circle"><span id="timer-num">30</span></div>
+      </div>
+      <span class="score-badge" id="score-badge">Score: 0</span>
+    </div>
+  </div>
+  <div class="question-card" id="question-card">
+    <div class="topic-tag" id="topic-tag">Topic</div>
+    <div class="question-text" id="question-text">Question</div>
+    <div class="options-grid" id="options-grid"></div>
+    <div class="explanation-box" id="explanation-box"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result-screen">
+  <div class="result-card">
+    <div class="result-emoji" id="result-emoji">🎓</div>
+    <div class="result-title" id="result-title">Well Done!</div>
+    <div class="result-score-big" id="result-score-big">0%</div>
+    <div class="result-details">
+      <div class="result-detail"><strong id="r-correct">0</strong>Correct</div>
+      <div class="result-detail"><strong id="r-wrong">0</strong>Incorrect</div>
+      <div class="result-detail"><strong id="r-time">0s</strong>Avg Time</div>
+    </div>
+    <div class="breakdown-bars" id="breakdown-bars"></div>
+    <div class="action-btns">
+      <button class="retry-btn" onclick="retryQuiz()">Try Again</button>
+      <button class="review-btn" onclick="showStart()">Change Mode</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  // ── CHAPTER 1 ─────────────────────────────────────────────────────────────
+  {topic:"Ch.1 – Forces",q:"Which of the following is NOT one of the five powerful forces transforming the service landscape?",opts:["Government Policies","Social Changes","Military Expansion","Globalization"],ans:2,exp:"The five forces are Government Policies, Social Changes, Business Trends, Advances in IT, and Globalization. Military Expansion is not among them."},
+  {topic:"Ch.1 – Forces",q:"Services now account for more than ___ % of GDP worldwide.",opts:["40%","60%","80%","50%"],ans:1,exp:"The notes state that services account for more than 60% of GDP worldwide."},
+  {topic:"Ch.1 – Forces",q:"In Jersey, services account for approximately what percentage of GDP?",opts:["79%","90%","95%","97%"],ans:3,exp:"Jersey is cited as an example where services account for 97% of GDP — the highest mentioned in the notes."},
+  {topic:"Ch.1 – Service Categories",q:"A barber shop is an example of which service category?",opts:["Possession Processing","Mental Stimulus Processing","People Processing","Information Processing"],ans:2,exp:"People Processing services involve tangible actions directed at people's bodies. Barbers physically act on the customer."},
+  {topic:"Ch.1 – Service Categories",q:"Which service category requires the customer to be physically present during delivery?",opts:["Information Processing only","Possession Processing only","People Processing","Mental Stimulus Processing only"],ans:2,exp:"People Processing services require the customer to be physically present because the service is performed directly on their body."},
+  {topic:"Ch.1 – Service Categories",q:"Accounting and banking are examples of which service category?",opts:["People Processing","Possession Processing","Mental Stimulus Processing","Information Processing"],ans:3,exp:"Information Processing services involve intangible actions directed at intangible assets like data. Accounting and banking are classic examples."},
+  {topic:"Ch.1 – Service Categories",q:"Which service category is described as the MOST intangible form of service?",opts:["People Processing","Possession Processing","Mental Stimulus Processing","Information Processing"],ans:3,exp:"The notes explicitly state that Information Processing is 'the most intangible form of service' where value comes from data manipulation."},
+  {topic:"Ch.1 – Service Categories",q:"A car refueling service belongs to which category?",opts:["People Processing","Possession Processing","Mental Stimulus Processing","Information Processing"],ans:1,exp:"Possession Processing involves tangible actions directed at physical possessions. Refueling acts on the car, not the person."},
+  {topic:"Ch.1 – Non-Ownership",q:"Which of the following best describes the 'non-ownership' framework in service marketing?",opts:["Customers buy goods and keep them permanently","Customers rent goods, access, or expertise for a defined period","Services are free to use at any time","Customers always co-own the service with the provider"],ans:1,exp:"The non-ownership framework holds that customers pay for temporary access or use — not permanent legal ownership of any physical element."},
+  {topic:"Ch.1 – Non-Ownership",q:"Renting golf clubs is an example of which 'rental' category?",opts:["Defined Space and Place Rentals","Labor and Expertise Rentals","Rented Goods Services","Access to Systems and Networks"],ans:2,exp:"Rented Goods Services involve paying to use a physical object for a set period — such as renting golf clubs or a car."},
+  {topic:"Ch.1 – 7 Ps",q:"The extended 7 Ps of service marketing adds which three elements to the traditional 4 Ps?",opts:["People, Process, Physical Environment","People, Promotion, Place","Process, Price, Physical Environment","Product, People, Place"],ans:0,exp:"The three additional Ps are Process (P5), Physical Environment (P6), and People (P7), which address the customer interface in services."},
+  {topic:"Ch.1 – 7 Ps",q:"Which of the 7 Ps refers to the 'servicescape' — the tangible cues customers use to evaluate quality?",opts:["Process","People","Physical Environment","Promotion"],ans:2,exp:"Physical Environment (P6) refers to the servicescape — the appearance of buildings, equipment, and furnishings that serve as tangible quality cues."},
+  {topic:"Ch.1 – 7 Ps",q:"In service marketing, which function is described as the ONLY one that brings operating revenues into the business?",opts:["Operations Management","Human Resources","Information Technology","Marketing"],ans:3,exp:"The notes explicitly state that 'Marketing is the only function to bring operating revenues into a business,' while others are cost centers."},
+  {topic:"Ch.1 – Integration",q:"Which three management functions must be closely coordinated in service organizations?",opts:["Marketing, Finance, IT","Marketing, Operations, Human Resources","HR, Accounting, Legal","Operations, Finance, Marketing"],ans:1,exp:"The notes identify Marketing, Operations Management, and Human Resources as the three interrelated functions that must be coordinated in service delivery."},
+  {topic:"Ch.1 – Forces",q:"'Offshoring of customer service functions to lower-cost countries' is associated with which transformative force?",opts:["Social Changes","Business Trends","Globalization","Government Policies"],ans:2,exp:"Offshoring is described under Globalization — the internationalization of the economy expanding the reach of service firms."},
+  {topic:"Ch.1 – Forces",q:"Rising consumer affluence and people being 'short of time' are examples of which transformative force?",opts:["Advances in Information Technology","Globalization","Social Changes","Business Trends"],ans:2,exp:"Social Changes as a force includes rising affluence, time pressure, and an increased desire for experiences rather than physical things."},
+  {topic:"Ch.1 – Forces",q:"The rapid growth of the internet and wireless networking as service drivers belongs to which force?",opts:["Government Policies","Social Changes","Business Trends","Advances in Information Technology"],ans:3,exp:"Advances in Information Technology includes internet growth, mobile equipment, digitization, and more powerful software enabling new service categories."},
+  {topic:"Ch.1 – Service Characteristics",q:"Which characteristic of services makes it impossible to produce and store them in advance like goods?",opts:["Intangibility","Co-production","Perishability","Heterogeneity"],ans:2,exp:"Perishability means services cannot be stored — unused capacity is permanently lost. An empty airline seat cannot be saved for later."},
+  {topic:"Ch.1 – Strategy Framework",q:"The four-part service marketing strategy framework begins with which step?",opts:["Applying the 7 Ps","Managing the Customer Interface","Understanding Service Products, Consumers, and Markets","Implementing Profitable Service Strategies"],ans:2,exp:"Part 1 of the framework is 'Understanding Service Products, Consumers, and Markets' — developing foundational knowledge before applying any tools."},
+  {topic:"Ch.1 – Strategy Framework",q:"'Service Recovery' and 'Building Customer Loyalty' are part of which phase of the service marketing strategy framework?",opts:["Part 1: Understanding","Part 2: Traditional 4 Ps","Part 3: Managing the Customer Interface","Part 4: Implementing Profitable Service Strategies"],ans:3,exp:"These are long-term implementation strategies covered in Part 4 of the framework."},
+  // ── CHAPTER 2 ─────────────────────────────────────────────────────────────
+  {topic:"Ch.2 – 3-Stage Model",q:"What are the three stages of the service consumption model?",opts:["Awareness, Purchase, Satisfaction","Pre-purchase, Service Encounter, Post-encounter","Search, Experience, Credence","Arousal, Evaluation, Decision"],ans:1,exp:"The three-stage model is: Pre-purchase Stage → Service Encounter Stage → Post-encounter Stage."},
+  {topic:"Ch.2 – 3-Stage Model",q:"'Need arousal' occurs in which stage of the service consumption model?",opts:["Service Encounter Stage","Post-encounter Stage","Pre-purchase Stage","Evaluation Stage"],ans:2,exp:"Need arousal is the first step of the Pre-purchase Stage, triggered by internal, unconscious, or external sources."},
+  {topic:"Ch.2 – Attributes",q:"Which type of service attribute can be evaluated BEFORE purchase?",opts:["Credence attributes","Experience attributes","Search attributes","Intangible attributes"],ans:2,exp:"Search attributes are tangible features evaluable before purchase — such as price, location, and type of food offered."},
+  {topic:"Ch.2 – Attributes",q:"The hygiene condition of a restaurant kitchen is an example of which attribute type?",opts:["Search attribute","Experience attribute","Credence attribute","Functional attribute"],ans:2,exp:"Credence attributes are impossible to evaluate confidently even after consumption. You cannot verify kitchen hygiene by eating the food."},
+  {topic:"Ch.2 – Attributes",q:"Haircuts and restaurant meals are HIGH in which type of attribute?",opts:["Search attributes","Credence attributes","Experience attributes","Physical attributes"],ans:2,exp:"Experience attributes can only be evaluated DURING consumption — so haircuts and meals are classic examples."},
+  {topic:"Ch.2 – Attributes",q:"Professional services like complex surgery are considered HIGH in which attribute type?",opts:["Search attributes","Experience attributes","Credence attributes","Physical attributes"],ans:2,exp:"Credence attributes characterize services where customers lack technical knowledge to judge performance even after consuming the service."},
+  {topic:"Ch.2 – Perceived Risk",q:"Fear of wasted time or delays is classified as which type of perceived risk?",opts:["Financial risk","Functional risk","Temporal risk","Psychological risk"],ans:2,exp:"Temporal risk refers to the risk of wasted time or delays that lead to further problems in service purchasing decisions."},
+  {topic:"Ch.2 – Perceived Risk",q:"Concern about how others may view your service choice is classified as which type of risk?",opts:["Psychological risk","Sensory risk","Social risk","Financial risk"],ans:2,exp:"Social risk refers to concerns about how other people might perceive or react to the consumer's service choice."},
+  {topic:"Ch.2 – Perceived Risk",q:"Which risk-reduction strategy involves letting customers experience the service before committing?",opts:["Display Credentials","Provide Guarantees","Offer Free Trials","Encourage Facility Visits"],ans:2,exp:"Free Trials allow customers to sample a service performance before purchase, especially effective for experience-heavy services."},
+  {topic:"Ch.2 – Perceived Risk",q:"Showing professional certifications is which risk-reduction strategy?",opts:["Evidence Management","Free Trials","Display Credentials","Realistic Service Previews"],ans:2,exp:"Displaying credentials (certifications, degrees) helps build trust and reduce perceived risk, especially for credence-heavy services."},
+  {topic:"Ch.2 – Expectations",q:"The MINIMUM level of service a customer is willing to accept is known as:",opts:["Desired Service Level","Predicted Service Level","Adequate Service Level","Zone of Tolerance"],ans:2,exp:"The Adequate Service Level is the minimum acceptable threshold. Service below this level results in customer dissatisfaction."},
+  {topic:"Ch.2 – Expectations",q:"The Zone of Tolerance is defined as the range between:",opts:["Predicted and Adequate service levels","Desired and Adequate service levels","Desired and Predicted service levels","Minimum and Maximum service levels"],ans:1,exp:"The Zone of Tolerance spans from the Adequate Service Level (minimum acceptable) to the Desired Service Level (wished-for quality)."},
+  {topic:"Ch.2 – Expectations",q:"Which of the following does NOT influence customer service expectations?",opts:["Past experiences","Word-of-mouth from others","Stock price of the company","Marketing promises"],ans:2,exp:"The notes identify internal factors (needs, past experience) and external factors (word-of-mouth, firm promises) as expectation drivers. Stock price is irrelevant."},
+  {topic:"Ch.2 – Post-encounter",q:"When actual service performance EXCEEDS customer expectations, this is called:",opts:["Confirmation","Negative disconfirmation","Positive disconfirmation","Zone satisfaction"],ans:2,exp:"Positive disconfirmation occurs when performance was better than expected — the foundation of customer delight."},
+  {topic:"Ch.2 – Post-encounter",q:"Customer delight requires which THREE elements beyond standard satisfaction?",opts:["Good price, fast service, nice staff","Unexpectedly high performance, arousal (surprise), and positive affect (joy)","Quality product, clean environment, friendly staff","Speed, accuracy, and reliability"],ans:1,exp:"The notes define customer delight as requiring unexpectedly high performance levels, arousal (surprise), and positive affect (joy) — going beyond mere satisfaction."},
+  {topic:"Ch.2 – Moments of Truth",q:"'Moments of Truth' refers to:",opts:["Service guarantees offered to customers","Specific touchpoints where perceived service quality is realized","Price comparison between competitors","Staff performance reviews"],ans:1,exp:"Moments of Truth are the specific interaction touchpoints where the service provider and customer confront each other, and quality is co-created in real time."},
+  {topic:"Ch.2 – Servuction",q:"In the Servuction Model, the 'backstage' refers to:",opts:["The lobby and visible décor","The technical core — operations invisible to the customer","The customer-facing staff","The service guarantee policy"],ans:1,exp:"The backstage (technical core) is the invisible part of the servuction system where inputs are processed without the customer's knowledge — e.g., kitchen, IT systems."},
+  {topic:"Ch.2 – Servuction",q:"Which element is part of the FRONT STAGE in the Servuction system?",opts:["Kitchen staff","Reservation system","Contact Personnel (front desk)","Maintenance crews"],ans:2,exp:"Contact Personnel are the visible 'cast' members the customer interacts with directly — part of the front stage in the servuction model."},
+  {topic:"Ch.2 – Servuction",q:"In a hotel's servuction system, the laundry facility cleaning linens is part of:",opts:["Front Stage – Inanimate Environment","Front Stage – Contact Personnel","Backstage – Technical Core","Front Stage – Other Customers"],ans:2,exp:"The laundry facility is invisible to guests and is a backstage technical core activity, supporting the front-stage performance."},
+  {topic:"Ch.2 – High/Low Contact",q:"Internet banking and insurance are examples of which type of service contact?",opts:["High-contact services","Medium-contact services","Low-contact services","Physical contact services"],ans:2,exp:"Low-contact services involve little to no physical contact, delivered at arm's length through technology. Internet banking is a prime example."},
+  {topic:"Ch.2 – High/Low Contact",q:"Four-star hotels and airlines are examples of which contact type?",opts:["Low-contact services","No-contact services","High-contact services","Self-service"],ans:2,exp:"High-contact services require customers to remain present throughout delivery. Four-star hotels and airlines are classic examples."},
+  {topic:"Ch.2 – Theater Metaphor",q:"In the theater metaphor for service delivery, the service facility represents:",opts:["The cast","The audience","The stage","The script"],ans:2,exp:"In the theater metaphor, the service facility = the stage, personnel = the cast, and behavioral guidelines = the script."},
+  {topic:"Ch.2 – Theater Metaphor",q:"Script theory in services suggests that:",opts:["Only managers need to follow scripts","Both staff and customers follow expected behavioral sequences","Scripts are only for formal services","Scripts eliminate all service variability"],ans:1,exp:"Script theory holds that both service employees AND customers have expected behavioral sequences — deviation from script by either party affects service quality."},
+  {topic:"Ch.2 – Evoked Set",q:"The 'evoked set' in consumer decision-making refers to:",opts:["All services advertised to a customer","The consideration set of potential brands derived from experience or research","The list of services a customer has used before","Services recommended by family"],ans:1,exp:"The evoked set (consideration set) is the subset of brands a customer actively considers when seeking a service solution."},
+  {topic:"Ch.2 – Decision Rules",q:"A customer eliminates any hotel that doesn't offer free Wi-Fi, regardless of other features. This reflects which decision rule?",opts:["Linear compensatory rule","Zone of Tolerance rule","Conjunctive rule","Evoked set rule"],ans:2,exp:"The conjunctive rule sets minimum thresholds for every key attribute — if any attribute falls below the threshold, the option is eliminated."},
+  {topic:"Ch.2 – Decision Rules",q:"A customer selects a hotel because its great location compensates for its high price. This reflects which decision rule?",opts:["Conjunctive rule","Linear compensatory rule","Credence rule","Disconfirmation rule"],ans:1,exp:"The linear compensatory rule allows a high score in one attribute to offset a low score in another — trade-offs are permitted."},
+  // ── BRANDING & SEGMENTATION ────────────────────────────────────────────────
+  {topic:"Branding",q:"Singapore Airlines' 'Raffles Class' is an example of which branding approach?",opts:["Branded House","Endorsed Brand","Sub-brand","Co-brand"],ans:2,exp:"Sub-brand links the corporate name with a specific product name to signal different service levels — Raffles Class under Singapore Airlines."},
+  {topic:"Branding",q:"Using a SINGLE brand to cover ALL products and services is called:",opts:["Sub-brand","Endorsed Brand","Branded House","Multi-brand"],ans:2,exp:"The Branded House approach uses one single umbrella brand across all products and services — maximum consistency, single identity."},
+  {topic:"Branding",q:"In an 'Endorsed Brand' approach, which brand is dominant?",opts:["The corporate parent brand","Individual product brands","Both equally","Neither — a new brand is created"],ans:1,exp:"In the Endorsed Brand approach, individual product brands are dominant while the corporate brand provides a background 'halo' of credibility."},
+  {topic:"Segmentation",q:"Segmenting customers based on attitudes, values, and lifestyle interests is called:",opts:["Demographic segmentation","Geographic segmentation","Psychographic segmentation","Behavioral segmentation"],ans:2,exp:"Psychographic segmentation divides customers by psychological variables — attitudes, values, interests, lifestyle — rather than demographics."},
+  {topic:"Pricing",q:"Charging different prices to different customers at different times for the same service is called:",opts:["Bundle pricing","Penetration pricing","Dynamic pricing","Cost-plus pricing"],ans:2,exp:"Dynamic pricing adjusts prices in real time based on demand, timing, or customer segment — common in airlines, hotels, and ride-sharing."},
+  {topic:"Pricing",q:"Combining multiple service elements into one package for a single price is known as:",opts:["Dynamic pricing","Yield management","Bundling","Premium pricing"],ans:2,exp:"Bundling packages multiple service elements together at a combined price — creating perceived value and often encouraging higher spend."},
+  {topic:"Pricing",q:"Price elasticity measures:",opts:["How much a service costs to produce","How quickly prices change over time","How sensitive demand is to changes in price","How prices compare to competitors"],ans:2,exp:"Price elasticity is the measure of how responsive customer demand is to a change in price. High elasticity = big demand change with small price change."},
+  // ── INNOVATION ────────────────────────────────────────────────────────────
+  {topic:"Service Innovation",q:"Capsule hotels originated in which country in approximately which decade?",opts:["South Korea, 1970s","USA, 1990s","Japan, 1980s","Singapore, 2000s"],ans:2,exp:"The notes state capsule hotels 'started in Japan 1980 then soon growing in many countries.'"},
+  {topic:"Service Innovation",q:"Yotel's cabin concept drew inspiration from which TWO sources?",opts:["Japanese capsule hotels and Singapore Airlines Economy Class","Japan's capsule hotels and British Airways' first-class cabins","American motels and European hostels","Japanese ryokans and Airbus A380 suites"],ans:1,exp:"Yotel was inspired by Japan's capsule hotels AND the first-class cabins in British Airways airplanes."},
+  {topic:"Service Innovation",q:"What is the PRIMARY value proposition of capsule hotels at ~$30/night?",opts:["Luxury and exclusivity","Convenience and price","Space and privacy","Gourmet food and amenities"],ans:1,exp:"The notes explicitly state the 'main benefit: convenience and price' for capsule hotels."},
+  {topic:"Service Innovation",q:"Robot-run hotels represent a replacement of which element of the 7 Ps?",opts:["Process (P5)","Physical Environment (P6)","People (P7)","Promotion (P4)"],ans:2,exp:"People (P7) includes the contact personnel who deliver the service. Robot-run hotels automate and replace human contact staff."},
+  {topic:"Service Innovation",q:"Yotel's Premium Cabin includes all of the following EXCEPT:",opts:["A double bed convertible to a couch","A luxury bathroom","A swimming pool","A laptop-size safe for valuables"],ans:2,exp:"The notes describe Yotel Premium Cabin features including the convertible bed, luxury bathroom, desk, and safe — but no swimming pool."},
+  // ── COMMUNICATION ─────────────────────────────────────────────────────────
+  {topic:"Communication",q:"Which promotional tool builds credibility through unpaid third-party coverage?",opts:["Advertising","Dynamic pricing","Public Relations","Personal selling"],ans:2,exp:"Public Relations builds credibility through earned media and third-party endorsement — not paid advertising."},
+  {topic:"Communication",q:"Using high-quality furnishings and modern equipment as quality signals is called:",opts:["Advertising","Evidence Management","Service recovery","Dynamic pricing"],ans:1,exp:"Evidence Management uses tangible physical cues to help customers visualize and evaluate intangible service quality before purchase."},
+  {topic:"Communication",q:"Giving customers a clear idea of what to expect from a service before purchase is called:",opts:["Service guarantee","Realistic Service Preview","Zone of Tolerance","Positive disconfirmation"],ans:1,exp:"Realistic Service Previews set accurate expectations, help customers understand their role, and reduce pre-purchase anxiety and risk."},
+  {topic:"Communication",q:"Which communication challenge is UNIQUE to service marketing (vs. product marketing)?",opts:["Choosing the right media channel","Educating customers about their role in service co-production","Setting a competitive price","Managing brand identity"],ans:1,exp:"Because customers co-produce services, marketers must educate customers on how to participate — this has no direct equivalent in product marketing."},
+  // ── INTEGRATED/HARD ───────────────────────────────────────────────────────
+  {topic:"Integration",q:"A patient cannot tell if their surgery was performed correctly even after recovery. This is an example of which attribute AND which perceived risk type?",opts:["Search attribute / Financial risk","Experience attribute / Social risk","Credence attribute / Functional risk","Intangible attribute / Sensory risk"],ans:2,exp:"Surgery has credence attributes (hard to evaluate even after use) and creates Functional risk (fear the procedure wasn't performed correctly)."},
+  {topic:"Integration",q:"A budget airline offers free upgrades to business class when economy is overbooked. This primarily aims to create:",opts:["Negative disconfirmation","Zone of Tolerance compression","Positive disconfirmation / customer delight","Evidence management"],ans:2,exp:"Receiving a business class upgrade when expecting economy creates unexpectedly high performance — positive disconfirmation leading to delight."},
+  {topic:"Integration",q:"A luxury spa uses scent, lighting, and music to enhance its service. Which of the 7 Ps does this PRIMARILY represent?",opts:["Process (P5)","Physical Environment (P6)","People (P7)","Promotion (P4)"],ans:1,exp:"Physical Environment (P6) — the servicescape — includes sensory elements like scent, lighting, and music that create tangible quality cues."},
+  {topic:"Integration",q:"When a bank automates loan approvals, removing human judgment entirely, this most reduces variability in which service characteristic?",opts:["Intangibility","Perishability","Co-production","Heterogeneity / variability"],ans:3,exp:"Automation removes human-to-human variability (heterogeneity), standardizing outputs regardless of which employee or customer is involved."},
+  {topic:"Integration",q:"A customer who wants 5-minute delivery but accepts up to 15 minutes has a Zone of Tolerance of:",opts:["5 minutes","10 minutes","15 minutes","20 minutes"],ans:1,exp:"Zone of Tolerance = Desired level (5 min) – Adequate level (15 min) = 10 minutes of acceptable variation."},
+  {topic:"Integration",q:"Which service is MOST likely to use ALL of the following: theater metaphor, moments of truth, and high-contact servuction model?",opts:["Internet banking","Online insurance","Four-star hotel","Email marketing service"],ans:2,exp:"Four-star hotels are high-contact services with visible staff interactions (theater), multiple touchpoints (moments of truth), and rich servuction front/backstage dynamics."},
+  {topic:"Integration",q:"A firm uses a single brand for all its cleaning, pest control, and plumbing services. This is a:",opts:["Sub-brand strategy","Endorsed brand strategy","Branded House strategy","Co-branding strategy"],ans:2,exp:"A single brand across all product lines is the Branded House approach — maximum brand consistency, minimum differentiation between offerings."},
+  {topic:"Integration",q:"In the pre-purchase stage, a customer narrows down options from all known providers to a few they actively consider. This shortlist is called the:",opts:["Evoked set","Adequate set","Credence cluster","Perceived risk pool"],ans:0,exp:"The evoked set (or consideration set) is the small group of brands a customer actively considers when seeking a service solution."},
+  {topic:"Integration",q:"Which factor is NOT part of the 'desired service level' formation?",opts:["Personal needs","Past experiences","Current stock market performance","Marketing promises by the firm"],ans:2,exp:"Desired service levels are shaped by personal needs, past experience, word-of-mouth, and firm promises — not stock market performance."},
+  {topic:"Integration",q:"'Advances in IT' as a transformative force has most directly enabled which type of service to grow?",opts:["People Processing (e.g., barbers)","Possession Processing (e.g., car wash)","Information Processing (e.g., online banking)","All equally"],ans:2,exp:"IT advances — digitization, internet, wireless networking — have most directly enabled Information Processing services to expand globally."},
+  {topic:"Integration",q:"A customer leaves a dental clinic unsure whether the filling was done correctly. The dominant attribute here is:",opts:["Search attribute","Experience attribute","Credence attribute","Functional attribute"],ans:2,exp:"Dental work quality is nearly impossible for patients to evaluate — making it a credence attribute dominated service."},
+  {topic:"Integration",q:"The Servuction System was designed to explain which aspect of service marketing?",opts:["How to set service prices","The various types of interactions that together create the customer's service experience","How to manage employee training","How to conduct market segmentation"],ans:1,exp:"The Servuction Model focuses on the interactions — between customers, contact personnel, inanimate environment, and technical core — that create the service experience."},
+  {topic:"Integration",q:"A hospital wants to reduce patient anxiety before a procedure. The MOST relevant service marketing concept is:",opts:["Zone of Tolerance","Branded House strategy","Realistic Service Preview","Dynamic pricing"],ans:2,exp:"A Realistic Service Preview prepares customers for what to expect, reducing psychological risk and anxiety before service delivery."},
+  {topic:"Integration",q:"Which characteristic explains why an empty hotel room tonight represents permanently lost revenue?",opts:["Intangibility","Co-production","Perishability","Heterogeneity"],ans:2,exp:"Perishability means service capacity cannot be stored. An empty room tonight cannot be 'saved' — its revenue potential is permanently lost."},
+  {topic:"Integration",q:"Online therapy is best classified as which service type?",opts:["People Processing","Possession Processing","Mental Stimulus Processing","Possession and Information Processing"],ans:2,exp:"Online therapy involves intangible actions directed at people's minds — the definition of Mental Stimulus Processing services."},
+  {topic:"Integration",q:"A law firm displays its partners' qualifications, awards, and case-win statistics on its website. This is primarily which risk-reduction strategy?",opts:["Free Trials","Evidence Management and Display Credentials","Dynamic pricing","Realistic Service Preview"],ans:1,exp:"Displaying qualifications and track record uses both Evidence Management (physical cues) and Credential Display to reduce credence-related perceived risk."},
+  {topic:"Integration",q:"Which of the following best describes 'co-production' in service delivery?",opts:["The firm produces the service entirely backstage","The customer actively participates in creating the service experience","Two firms jointly deliver a service","IT systems replace human involvement in delivery"],ans:1,exp:"Co-production means customers are active participants in creating the service — their input, cooperation, and behavior affect the quality of the outcome."},
+  {topic:"Integration",q:"The 'Predicted Service Level' is best defined as:",opts:["The minimum the customer will accept","The wished-for ideal level","What the customer actually believes the firm will deliver","The firm's guaranteed performance level"],ans:2,exp:"The Predicted Service Level is what customers realistically believe the service provider will actually deliver — it influences their pre-encounter mental state."},
+  {topic:"Integration",q:"A restaurant chain operates under one master brand (e.g., McDonald's) across all its menu items. This is best described as:",opts:["An Endorsed Brand","A Sub-brand strategy","A Branded House","A Multi-brand portfolio"],ans:2,exp:"McDonald's uses a single master brand across all products and markets — the Branded House approach."},
+  {topic:"Integration",q:"Which type of service makes customers 'mentally present' but NOT necessarily physically present?",opts:["People Processing","Possession Processing","Mental Stimulus Processing","Information Processing"],ans:2,exp:"Mental Stimulus Processing requires customers to be mentally engaged but not physically present — e.g., online education or advertising."},
+  {topic:"Integration",q:"When a firm raises prices during peak demand (e.g., flights on holiday weekends), this is an application of:",opts:["Bundling","Prestige pricing","Dynamic pricing and revenue management","Cost-plus pricing"],ans:2,exp:"Raising prices during peak demand is a core application of dynamic pricing (also called revenue management or yield management)."},
+  {topic:"Integration",q:"Which of the following is a BACKSTAGE element in a hospital servuction system?",opts:["The reception desk","The waiting room décor","The surgical team operating in the OR","The nurse at the patient's bedside"],ans:2,exp:"The surgical team operating in the OR is a backstage technical core activity — not visible to the patient during most of their service encounter."},
+  {topic:"Integration",q:"A new service marketing student argues only the 4 Ps are needed. Which argument BEST challenges this?",opts:["Services need more advertising spend","Because services are intangible performances, the 'how' of delivery (Process) and 'who' delivers it (People) are inseparable from the product itself","Services are cheaper to produce than goods","The 4 Ps were designed for digital marketing"],ans:1,exp:"The 7 Ps argument centers on services being performances — where Process, People, and Physical Environment are not supplementary but core to the product."},
+  {topic:"Integration",q:"Customer satisfaction is measured by comparing:",opts:["Price paid vs. competitor price","Expectations vs. actual performance","Brand image vs. reality","Marketing spend vs. revenue"],ans:1,exp:"Satisfaction judgments result from comparing expectations to actual performance — positive disconfirmation (better), confirmation (same), or negative disconfirmation (worse)."},
+  {topic:"Integration",q:"Which of the following services has LOWEST customer variability in inputs and outputs?",opts:["Physiotherapy","Hair salon","Automated internet banking","Personal training"],ans:2,exp:"Automated internet banking processes standardized digital inputs with minimal human variation — making it the most consistent in inputs and outputs among the options."},
+  {topic:"Integration",q:"A theme park designing the layout, theming, and atmosphere of its rides is primarily working on which P?",opts:["Product (P1)","Promotion (P4)","Physical Environment (P6)","Process (P5)"],ans:2,exp:"Designing the atmosphere, layout, and sensory environment of the park is Physical Environment (P6) — the servicescape management."},
+  {topic:"Integration",q:"The FOUR categories of service classification are based on which TWO dimensions?",opts:["Price and quality","Nature of the service act (tangible/intangible) AND direct recipient (people/possessions)","Location and contact level","Speed of delivery and customer involvement"],ans:1,exp:"The 4-category framework uses: (1) nature of the act — tangible vs. intangible, and (2) direct recipient — people vs. possessions."},
+];
+
+let selectedMode = 'all';
+let quizQuestions = [];
+let currentIdx = 0;
+let score = 0;
+let wrongAnswers = 0;
+let answered = false;
+let timerInterval = null;
+let timeLeft = 30;
+let totalTime = 0;
+let questionStartTime = 0;
+let topicStats = {};
+
+function selectMode(btn, mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedMode = mode;
+}
+
+function getQuestions() {
+  let pool = [...ALL_QUESTIONS];
+  if (selectedMode === 'ch1') pool = pool.filter(q => q.topic.startsWith('Ch.1'));
+  else if (selectedMode === 'ch2') pool = pool.filter(q => q.topic.startsWith('Ch.2'));
+  else if (selectedMode === 'random25') {
+    pool = pool.sort(() => Math.random() - 0.5).slice(0, 25);
+    return pool;
+  }
+  return pool.sort(() => Math.random() - 0.5);
+}
+
+function startQuiz() {
+  quizQuestions = getQuestions();
+  currentIdx = 0; score = 0; wrongAnswers = 0; totalTime = 0; topicStats = {};
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[currentIdx];
+  answered = false;
+  const total = quizQuestions.length;
+  const pct = (currentIdx / total) * 100;
+
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = `Question ${currentIdx + 1} of ${total}`;
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+  document.getElementById('topic-tag').textContent = q.topic;
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('explanation-box').classList.remove('show');
+  document.getElementById('explanation-box').innerHTML = '';
+  document.getElementById('next-btn').classList.remove('show');
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, q.ans, q.exp, q.topic);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+  questionStartTime = Date.now();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = 30;
+  updateTimer();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) autoTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  document.getElementById('timer-num').textContent = timeLeft;
+  const circle = document.getElementById('timer-circle');
+  if (timeLeft <= 10) circle.classList.add('urgent');
+  else circle.classList.remove('urgent');
+}
+
+function autoTimeout() {
+  answered = true;
+  wrongAnswers++;
+  const q = quizQuestions[currentIdx];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add('correct');
+    else btn.classList.add('dimmed');
+  });
+  showExplanation("⏱ Time's up! " + q.exp, q.topic, false);
+}
+
+function selectAnswer(chosen, correct, exp, topic) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const elapsed = (Date.now() - questionStartTime) / 1000;
+  totalTime += elapsed;
+
+  if (!topicStats[topic]) topicStats[topic] = { correct: 0, total: 0 };
+  topicStats[topic].total++;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    else if (i === chosen && chosen !== correct) btn.classList.add('wrong');
+    else btn.classList.add('dimmed');
+  });
+
+  if (chosen === correct) {
+    score++;
+    topicStats[topic].correct++;
+    showExplanation('✓ Correct! ' + exp, topic, true);
+  } else {
+    wrongAnswers++;
+    showExplanation('✗ Incorrect. ' + exp, topic, false);
+  }
+
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function showExplanation(text, topic, isCorrect) {
+  const box = document.getElementById('explanation-box');
+  box.innerHTML = text;
+  box.style.borderColor = isCorrect ? 'rgba(6,214,160,0.25)' : 'rgba(239,71,111,0.25)';
+  box.style.color = isCorrect ? '#8fdfcc' : '#f0a0b4';
+  box.classList.add('show');
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx >= quizQuestions.length) showResults();
+  else renderQuestion();
+}
+
+function showResults() {
+  clearInterval(timerInterval);
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'flex';
+
+  const total = quizQuestions.length;
+  const pct = Math.round((score / total) * 100);
+  const avgTime = total > 0 ? Math.round(totalTime / total) : 0;
+
+  let emoji = '😓', title = 'Keep Studying!';
+  if (pct >= 90) { emoji = '🏆'; title = 'Outstanding!'; }
+  else if (pct >= 75) { emoji = '🎓'; title = 'Great Job!'; }
+  else if (pct >= 60) { emoji = '📚'; title = 'Good Effort!'; }
+  else if (pct >= 40) { emoji = '💪'; title = 'Keep Pushing!'; }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score-big').textContent = pct + '%';
+  document.getElementById('r-correct').textContent = score;
+  document.getElementById('r-wrong').textContent = wrongAnswers;
+  document.getElementById('r-time').textContent = avgTime + 's';
+
+  const barsDiv = document.getElementById('breakdown-bars');
+  barsDiv.innerHTML = '<div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;font-weight:600;">Performance by Topic</div>';
+  Object.entries(topicStats).forEach(([topic, s]) => {
+    const tPct = Math.round((s.correct / s.total) * 100);
+    const color = tPct >= 75 ? '#06d6a0' : tPct >= 50 ? '#f5a623' : '#ef476f';
+    barsDiv.innerHTML += `
+      <div class="breakdown-row">
+        <div class="breakdown-label"><span>${topic}</span><span>${s.correct}/${s.total} (${tPct}%)</span></div>
+        <div class="breakdown-bar-bg"><div class="breakdown-bar-fill" style="width:${tPct}%;background:${color}"></div></div>
+      </div>`;
+  });
+}
+
+function retryQuiz() {
+  document.getElementById('result-screen').style.display = 'none';
+  startQuiz();
+}
+
+function showStart() {
+  clearInterval(timerInterval);
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'flex';
+}
+</script>
+</body>
+</html>
